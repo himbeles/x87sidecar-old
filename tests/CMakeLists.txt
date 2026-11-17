@@ -135,3 +135,6 @@ target_include_directories(test_opcode_table_parse PRIVATE ${PROJECT_SOURCE_DIR}
 add_executable(test_fragment_root host/test_fragment_root.cpp
     ${PROJECT_SOURCE_DIR}/rosetta_loader/src/fragment_root.cpp)
 target_include_directories(test_fragment_root PRIVATE ${PROJECT_SOURCE_DIR}/rosetta_loader/src)
+
+# Fixed guest addresses let the AoE decoder fixture specify its bounded text range.
+_add_x86_sample_impl(test_aoe_softfault "-Wl,-no_pie")

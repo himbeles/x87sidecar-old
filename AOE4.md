@@ -9,3 +9,6 @@ and builds the source in its engine workflow.
 The software-fault hook comes from [NerRobDog's port of Marc Ibrahim's decoder](https://github.com/NerRobDog/x87sidecar/commit/4b6bad8).
 Decoder composition and the FBLD fix are MIT-licensed [MacGames patches](https://github.com/tarikbc/macgames/tree/1579841b15ce569807b92af95b478c752c26df3d/patches/x87sidecar).
 Original source and license notices are retained.
+
+After building the tests, run `python3 scripts/test_aoe_softfault.py /path/to/build`
+to check software-fault delivery and its composition with the generic decoder.
