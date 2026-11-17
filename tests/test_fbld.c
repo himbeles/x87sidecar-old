@@ -27,6 +27,22 @@ static double do_fbld(const uint8_t bcd[10]) {
     return r;
 }
 
+/* Start a new translation block with a pop, so the cached run has a
+ * deferred tag update when FBLD loads its two input registers. */
+static double do_pop_fbld(const uint8_t bcd[10]) {
+    double r;
+    __asm__ volatile(
+        "fld1\n\t"
+        "jmp 1f\n\t"
+        "1: fstp %%st(0)\n\t"
+        "fbld %1\n\t"
+        "fstpl %0\n"
+        : "=m"(r)
+        : "m"(*(const uint8_t (*)[10])bcd)
+        : "st");
+    return r;
+}
+
 static void check(const char* name, const uint8_t bcd[10], double expected) {
     double got = do_fbld(bcd);
     /* Bit-exact compare so -0 vs +0 (and any NaN payload) is caught. */
@@ -42,6 +58,13 @@ static void check(const char* name, const uint8_t bcd[10], double expected) {
 }
 
 int main(void) {
+    {
+        const uint8_t b[10] = {0x42};
+        const double got = do_pop_fbld(b);
+        const int ok = got == 42.0;
+        printf("%s  FBLD after deferred pop: %.17g\n", ok ? "PASS" : "FAIL", got);
+        if (!ok) failures++;
+    }
     /* +0  → all zero, no sign bit */
     {
         uint8_t b[10] = {0};

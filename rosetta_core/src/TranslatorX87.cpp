@@ -317,6 +317,13 @@ auto translate_fbld(TranslationResult* a1, IRInstr* a2) -> void {
     const int Wd_tmp2 = alloc_gpr(*a1, 3);  // x87_push scratch (freed after push)
     const int Dd_val = alloc_free_fpr(*a1);
 
+    // A cached preceding pop can leave deferred tag updates. Flush these
+    // before the two BCD input registers become live: x87_push would otherwise
+    // allocate two more GPRs while base/TOP/ST-base, scratch and inputs already
+    // occupy seven of the eight slots. Keep the memory loads before the push
+    // so a faulting source does not change the architectural x87 stack.
+    x87_flush_deferred_pops(buf, *a1, Xbase, Wd_top, Wd_tmp);
+
     // Step 1: compute source memory address.
     const bool addr_is_64 = (a2->operands[0].mem.addr_size == IROperandSize::S64);
     const int Xaddr = compute_operand_address(*a1, addr_is_64, &a2->operands[0], GPR::XZR);
